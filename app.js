@@ -887,6 +887,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleDictationCorrect();
                 return;
             }
+
+            // Cas spécial : Mode Tuteur
+            if (commandResult.type === 'tutor_mode') {
+                isTutorMode = true;
+                tutorSubject = commandResult.data;
+                displayAIResponse(commandResult.speechResponse);
+                speakText(commandResult.speechResponse);
+                return;
+            }
+
+            if (commandResult.type === 'tutor_stop') {
+                isTutorMode = false;
+                tutorSubject = '';
+                displayAIResponse(commandResult.speechResponse);
+                speakText(commandResult.speechResponse);
+                return;
+            }
             
             // Commande locale exécutée avec succès
             if (commandResult.speechResponse) {
@@ -924,6 +941,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let responseText = '';
             
+            // Override temporaire des instructions système pour le Mode Tuteur
+            const origSystem = systemInstructions;
+            if (isTutorMode) {
+                systemInstructions = `Tu es un professeur expert, passionné et très pédagogue en "${tutorSubject}". Ton but est de m'enseigner ce sujet de manière claire et concise. Corrige mes erreurs de manière encourageante, et pose-moi de petites questions à la fin de tes réponses pour vérifier ma compréhension.\n\n` + origSystem;
+            }
+
             if (aiProvider === 'ollama') {
                 // --- Streaming Ollama : affichage en temps réel ---
                 let streamedText = '';
@@ -953,6 +976,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 responseText = getLocalDemoResponse(text);
                 aiLoadingIndicator.classList.add('hidden');
             }
+            
+            // Restaurer les instructions système originales
+            systemInstructions = origSystem;
             
             // --- Traitement des MACRO OS ---
             const macroRegex = /\[MACRO:\s*(\[.*?\])\s*\]/is;
@@ -1286,10 +1312,23 @@ document.addEventListener('DOMContentLoaded', () => {
         clearAllWidgets();
     });
     
-    // --- 7. Mode Dictée et Réflexion Profonde ---
+    // --- 7. Mode Dictée, Réflexion Profonde et Tuteur ---
     
     let isDictationMode = false;
     let dictationBuffer = '';
+    
+    let isTutorMode = false;
+    let tutorSubject = '';
+    
+    // Listener pour stopper le mode tuteur via l'UI du widget
+    window.addEventListener('vocalis-tutor-stop', () => {
+        if (isTutorMode) {
+            isTutorMode = false;
+            tutorSubject = '';
+            displayAIResponse("Session d'étude terminée.");
+            speakText("Session d'étude terminée.");
+        }
+    });
     
     // Listener pour les événements de dictée depuis les commandes
     window.addEventListener('vocalis-dictation', (e) => {

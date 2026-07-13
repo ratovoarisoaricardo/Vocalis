@@ -40,12 +40,15 @@ echo.
 echo [4/4] Demarrage du serveur HTTP local sur le port 8080...
 echo.
 echo ============================================
-echo   Ouvrez votre navigateur a l'adresse :
+echo   Le navigateur va s'ouvrir automatiquement a l'adresse :
 echo   http://localhost:8080
 echo ============================================
 echo.
 echo   Appuyez sur Ctrl+C pour arreter le serveur.
 echo.
+
+:: Ouvrir le navigateur par defaut
+start http://localhost:8080
 
 :: Utiliser Python si disponible (il a un serveur HTTP integre)
 where python >nul 2>&1

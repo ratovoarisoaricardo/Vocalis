@@ -67,7 +67,7 @@ function parseVoiceCommand(text) {
     }
 
     // 2. Pomodoro / Sessions d'étude
-    const pomodoroMatch = trimmedText.match(/^(?:lance|démarre|commence|crée|créer|lancer|démarrer)\s+(?:un\s+|une\s+)?(?:pomodoro|minuteur\s+d'étude|session\s+de\s+révision)/i) ||
+    const pomodoroMatch = trimmedText.match(/^(?:lance|démarre|commence|crée|créer|lancer|démarrer)\s+(?:un\s+|une\s+)?(?:pomodoro|minuteur\s+d'étude|session\s+d'étude|session\s+de\s+révision)/i) ||
                           cleanText === 'pomodoro';
     if (pomodoroMatch) {
         createPomodoroWidget();
@@ -75,6 +75,28 @@ function parseVoiceCommand(text) {
             type: 'pomodoro',
             speechResponse: "C'est parti ! Je démarre une session d'étude de 25 minutes. Concentrez-vous bien.",
             data: null
+        };
+    }
+
+    // 3. Mode Tuteur (Tutor Mode)
+    const tutorStartMatch = trimmedText.match(/^(?:apprends-moi|enseigne-moi|active le mode tuteur)\s*(?:le|la|les|l')?\s*(.+)/i);
+    const tutorStopMatch = trimmedText.match(/^(?:désactive|arrête|quitte|stoppe)\s+(?:le\s+)?(?:mode\s+tuteur)/i);
+
+    if (tutorStopMatch) {
+        return {
+            type: 'tutor_stop',
+            speechResponse: "Très bien, je désactive le mode tuteur.",
+            data: null
+        };
+    }
+
+    if (tutorStartMatch) {
+        const subject = tutorStartMatch[1].replace(/[?.!]/g, '').trim();
+        createTutorWidget(subject);
+        return {
+            type: 'tutor_mode',
+            speechResponse: `J'active le mode tuteur. Je suis prêt à vous enseigner sur le sujet : ${subject}. Posez-moi vos questions !`,
+            data: subject
         };
     }
 
@@ -1434,3 +1456,37 @@ function clearDictationText() {
     if (area) area.textContent = '';
     if (corrected) corrected.classList.add('hidden');
 }
+
+/**
+ * Crée un widget Tuteur
+ */
+function createTutorWidget(subject) {
+    const container = document.getElementById('widgetsContainer');
+    removeEmptyState();
+    
+    // Fermer l'ancien widget tuteur s'il existe
+    const oldWidget = document.querySelector('.widget-tutor');
+    if (oldWidget) {
+        closeWidget(oldWidget.id);
+    }
+    
+    const widgetId = `tutor-${Date.now()}`;
+    const card = document.createElement('div');
+    card.className = 'widget-card widget-tutor';
+    card.id = widgetId;
+    
+    card.innerHTML = `
+        <button class="widget-card-close" onclick="closeWidget('${widgetId}'); window.dispatchEvent(new CustomEvent('vocalis-tutor-stop'))"><i class="fa-solid fa-xmark"></i></button>
+        <div class="widget-title"><i class="fa-solid fa-graduation-cap"></i> Mode Tuteur Actif</div>
+        <div class="tutor-layout">
+            <div class="tutor-subject-title">Sujet : <strong>${subject}</strong></div>
+            <div class="tutor-status"><i class="fa-solid fa-chalkboard-user"></i> Posez vos questions à la voix...</div>
+            <button class="tutor-stop-btn" onclick="closeWidget('${widgetId}'); window.dispatchEvent(new CustomEvent('vocalis-tutor-stop'))">
+                Arrêter la session
+            </button>
+        </div>
+    `;
+    
+    container.insertBefore(card, container.firstChild);
+}
+
