@@ -75,6 +75,22 @@ body::before {
     z-index: -1;
 }
 
+body::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 12px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 243, 255, 0.4), transparent);
+    z-index: 9999;
+    pointer-events: none;
+    animation: scanline 6s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes scanline {
+    0% { top: -10%; }
+    100% { top: 110%; }
+}
+
 @keyframes bgGlow {
     0% { background-position: 0% 0%; }
     100% { background-position: 100% 100%; }
@@ -434,7 +450,17 @@ input, select, textarea {
 
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5), inset 0 0 10px rgba(255,255,255,0.2);
+    animation: glitchHover 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+}
+
+@keyframes glitchHover {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 1px) }
+    40% { transform: translate(-1px, -1px) }
+    60% { transform: translate(2px, 1px) }
+    80% { transform: translate(1px, -1px) }
+    100% { transform: translate(0) }
 }
 
 .btn-primary:active {
@@ -786,6 +812,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     border-color: var(--accent-primary);
     color: var(--text-primary);
     box-shadow: 0 0 35px rgba(112, 0, 255, 0.6), inset 0 0 20px rgba(112, 0, 255, 0.4);
+    animation: glitchHover 0.2s linear infinite alternate;
 }
 
 .btn-orb-trigger.listening {
@@ -847,24 +874,49 @@ input[type="range"]::-webkit-slider-thumb:hover {
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.02);
-    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: holographicAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.speech-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(0, 243, 255, 0.1), transparent);
+    transform: skewX(-20deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
 }
 
 .speech-card:hover {
-    border-color: rgba(0, 243, 255, 0.4);
+    border-color: rgba(0, 243, 255, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(0, 243, 255, 0.1), inset 0 0 15px rgba(0, 243, 255, 0.05);
+    box-shadow: 0 6px 25px rgba(0, 243, 255, 0.2), inset 0 0 20px rgba(0, 243, 255, 0.1);
 }
 
-@keyframes slideUp {
-    from {
+@keyframes holographicAppear {
+    0% {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(20px) scaleY(0.1);
+        filter: blur(10px);
     }
-    to {
+    50% {
+        opacity: 0.5;
+        transform: translateY(-5px) scaleY(1.1);
+        filter: blur(2px);
+    }
+    100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scaleY(1);
+        filter: blur(0);
     }
 }
 
@@ -1051,24 +1103,25 @@ input[type="range"]::-webkit-slider-thumb:hover {
     position: relative;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    animation: widgetSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: holographicAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+
+.widget-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.1), transparent);
+    transform: skewX(-20deg);
+    animation: shine 4s infinite 1s;
 }
 
 .widget-card:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
-@keyframes widgetSlide {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2), inset 0 0 15px rgba(139, 92, 246, 0.05);
 }
 
 .widget-card-close {

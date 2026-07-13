@@ -30,8 +30,14 @@ if %ERRORLEVEL% == 0 (
 )
 echo.
 
+:: Demarrer le serveur backend Dejavu dans une nouvelle fenetre
+echo [3/4] Demarrage du serveur Backend (Python)...
+start "Vocalis Backend" cmd /k "python dejavu_server.py"
+echo       OK - Backend lance.
+echo.
+
 :: Demarrer le serveur HTTP local
-echo [3/3] Demarrage du serveur HTTP local sur le port 8080...
+echo [4/4] Demarrage du serveur HTTP local sur le port 8080...
 echo.
 echo ============================================
 echo   Ouvrez votre navigateur a l'adresse :
