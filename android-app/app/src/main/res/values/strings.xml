@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Vocalis Translator</string>
+    <string name="accessibility_service_description">Service d\'accessibilité de Vocalis AI pour traduire automatiquement les messages sur WhatsApp et WhatsApp Business.</string>
+</resources>

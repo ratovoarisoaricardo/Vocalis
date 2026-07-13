@@ -1,0 +1,369 @@
+<!--
+    Copyright (c) 2026 Ricardo Ratovoarisoa. Tous droits réservés.
+    Ce projet et son code source sont protégés sous licence propriétaire.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocalis AI - Assistant Vocal Intelligent Multi-Fonctions</title>
+    <meta name="description" content="Découvrez Vocalis AI, votre assistant virtuel à commande vocale. Posez des questions, créez des notes, lancez des minuteurs et obtenez des réponses intelligentes en temps réel.">
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Settings -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-wand-magic-sparkles logo-icon"></i>
+                    <span>Configuration</span>
+                </div>
+                <button class="btn-close-sidebar" id="btnCloseSidebar" aria-label="Fermer le menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- IA Provider Selector -->
+                <div class="settings-group">
+                    <h3><i class="fa-solid fa-brain"></i> Fournisseur d'IA</h3>
+                    <div class="provider-selector">
+                        <button class="btn-provider active" id="btnProviderGemini" data-provider="gemini">
+                            <i class="fa-solid fa-cloud"></i> Gemini Cloud
+                        </button>
+                        <button class="btn-provider" id="btnProviderOllama" data-provider="ollama">
+                            <i class="fa-solid fa-computer"></i> Ollama Local
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gemini Configuration (Masquée en arrière-plan) -->
+                <div class="settings-group provider-config" id="configGemini" style="display: none;">
+                    <input type="hidden" id="geminiApiKey" value="">
+                    <button id="btnSaveApiKey" style="display:none;"></button>
+                    <div id="apiKeyStatus" style="display:none;"></div>
+                </div>
+
+                <!-- Ollama Configuration -->
+                <div class="settings-group provider-config hidden" id="configOllama">
+                    <h3><i class="fa-solid fa-network-wired"></i> Configuration Ollama</h3>
+                    <p class="settings-help">Assurez-vous qu'Ollama est lancé en local sur votre machine (`ollama run llama3`).</p>
+                    
+                    <label for="ollamaUrl">URL du serveur local :</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="text" id="ollamaUrl" value="http://localhost:11434" placeholder="http://localhost:11434">
+                    </div>
+
+                    <label for="ollamaModel">Nom du modèle local :</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-microchip"></i>
+                        <input type="text" id="ollamaModel" value="llama3" placeholder="llama3, mistral, gemma2...">
+                    </div>
+                    
+                    <button class="btn-primary" id="btnSaveOllama">Enregistrer les réglages</button>
+                    <div id="ollamaStatus" class="status-msg"></div>
+                </div>
+
+                <!-- Voice Selection Section -->
+                <div class="settings-group">
+                    <h3><i class="fa-solid fa-volume-high"></i> Paramètres Vocaux</h3>
+                    
+                    <label for="langSelect">Langue de l'assistant :</label>
+                    <div class="select-wrapper">
+                        <select id="langSelect" class="styled-select">
+                            <option value="auto" selected>🌍 Auto-détection</option>
+                            <option value="fr-FR">🇫🇷 Français</option>
+                            <option value="en-US">🇺🇸 English</option>
+                            <option value="es-ES">🇪🇸 Español</option>
+                            <option value="de-DE">🇩🇪 Deutsch</option>
+                            <option value="it-IT">🇮🇹 Italiano</option>
+                            <option value="pt-BR">🇧🇷 Português</option>
+                            <option value="ar-SA">🇸🇦 العربية</option>
+                            <option value="nl-NL">🇳🇱 Nederlands</option>
+                            <option value="ru-RU">🇷🇺 Русский</option>
+                            <option value="zh-CN">🇨🇳 中文</option>
+                            <option value="ja-JP">🇯🇵 日本語</option>
+                            <option value="ko-KR">🇰🇷 한국어</option>
+                            <option value="hi-IN">🇮🇳 हिन्दी</option>
+                            <option value="tr-TR">🇹🇷 Türkçe</option>
+                        </select>
+                    </div>
+
+                    <div class="switch-group">
+                        <div class="switch-label">
+                            <span class="switch-title"><i class="fa-solid fa-ear-listen"></i> Écoute en arrière-plan</span>
+                            <span class="switch-desc">Mots d'activation : "Vocalis" ou "Siri"</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="wakeWordToggle">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+                    
+                    <label for="voiceSelect">Sélectionner la voix :</label>
+                    <div class="select-wrapper">
+                        <select id="voiceSelect" class="styled-select">
+                            <option value="">Chargement des voix...</option>
+                        </select>
+                    </div>
+
+                    <div class="range-group">
+                        <div class="range-label">
+                            <label for="voiceRate">Vitesse :</label>
+                            <span id="rateValue">1x</span>
+                        </div>
+                        <input type="range" id="voiceRate" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+
+                    <div class="range-group">
+                        <div class="range-label">
+                            <label for="voicePitch">Tonalité :</label>
+                            <span id="pitchValue">1</span>
+                        </div>
+                        <input type="range" id="voicePitch" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+
+                    <div class="range-group" style="margin-top: 12px;">
+                        <label for="systemInstructions" style="margin-top: 0; margin-bottom: 6px;"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-primary);"></i> Personnalité / Consignes IA :</label>
+                        <textarea id="systemInstructions" class="styled-textarea" rows="4" placeholder="Ex: Tu es un assistant vocal concis, poli et chaleureux. Réponds brièvement..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Audio Input Feedback -->
+                <div class="settings-group">
+                    <h3><i class="fa-solid fa-microphone-lines"></i> Entrée Microphone</h3>
+                    <div class="mic-test-container">
+                        <div class="mic-indicator-bar" id="micIndicatorBar"></div>
+                    </div>
+                    <button class="btn-secondary" id="btnTestMic"><i class="fa-solid fa-microphone"></i> Autoriser / Tester Micro</button>
+                </div>
+
+                <!-- Shazam Configuration -->
+                <div class="settings-group">
+                    <h3><i class="fa-solid fa-music"></i> Fournisseur Shazam</h3>
+                    <div class="provider-selector" style="margin-bottom: 12px;">
+                        <button class="btn-provider active" id="btnShazamDemo" data-shazam="demo">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Démo
+                        </button>
+                        <button class="btn-provider" id="btnShazamAudd" data-shazam="audd">
+                            <i class="fa-solid fa-cloud"></i> AudD Cloud
+                        </button>
+                        <button class="btn-provider" id="btnShazamDejavu" data-shazam="dejavu">
+                            <i class="fa-solid fa-computer"></i> Dejavu Local
+                        </button>
+                    </div>
+                    
+                    <!-- AudD Cloud Configuration (Masquée en arrière-plan) -->
+                    <div id="configShazamAudd" class="provider-config hidden" style="display: none;">
+                        <input type="hidden" id="shazamApiKey" value="">
+                        <button id="btnSaveShazamKey" style="display:none;"></button>
+                        <div id="shazamStatus" style="display:none;"></div>
+                    </div>
+
+                    <!-- Dejavu Local Configuration -->
+                    <div id="configShazamDejavu" class="provider-config hidden">
+                        <p class="settings-help">Reconnaissance locale gratuite via votre serveur Python Dejavu.</p>
+                        <label for="shazamDejavuUrl">URL de votre serveur Dejavu :</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-link"></i>
+                            <input type="text" id="shazamDejavuUrl" value="http://localhost:5000/recognize" placeholder="http://localhost:5000/recognize">
+                        </div>
+                        <button class="btn-primary" id="btnSaveShazamDejavu" style="margin-top: 8px;">Enregistrer les réglages</button>
+                        <div id="shazamDejavuStatus" class="status-msg"></div>
+                    </div>
+                </div>
+
+                <!-- Help Commands List -->
+                <div class="settings-group help-commands">
+                    <h3><i class="fa-solid fa-circle-question"></i> Commandes d'action</h3>
+                    <ul>
+                        <li><span class="cmd-trigger">"crée une note [texte]"</span> <span class="cmd-desc">Crée un post-it virtuel</span></li>
+                        <li><span class="cmd-trigger">"lance un minuteur de [X] secondes/minutes"</span> <span class="cmd-desc">Démarre un widget minuteur</span></li>
+                        <li><span class="cmd-trigger">"météo à [ville]"</span> <span class="cmd-desc">Affiche la météo de la ville</span></li>
+                        <li><span class="cmd-trigger">"cherche [sujet] sur google"</span> <span class="cmd-desc">Recherche Web externe</span></li>
+                        <li><span class="cmd-trigger">"combien font [opération]"</span> <span class="cmd-desc">Calcule et affiche le résultat</span></li>
+                        <li class="cmd-divider"></li>
+                        <li><span class="cmd-trigger">"🎵 joue [musique/artiste]"</span> <span class="cmd-desc">Ouvre sur YouTube</span></li>
+                        <li><span class="cmd-trigger">"🎬 regarde la vidéo [titre]"</span> <span class="cmd-desc">Recherche vidéo YouTube</span></li>
+                        <li><span class="cmd-trigger">"🔊 augmente/baisse le volume"</span> <span class="cmd-desc">Contrôle du son</span></li>
+                        <li><span class="cmd-trigger">"📂 ouvre mes fichiers"</span> <span class="cmd-desc">Explorateur de fichiers</span></li>
+                        <li><span class="cmd-trigger">"✍️ mode dictée"</span> <span class="cmd-desc">Transcrit et corrige votre texte</span></li>
+                        <li><span class="cmd-trigger">"🧠 réfléchis sur [sujet]"</span> <span class="cmd-desc">Analyse profonde par l'IA</span></li>
+                        <li><span class="cmd-trigger">"🎵 Shazam / quelle est cette musique"</span> <span class="cmd-desc">Identifie la chanson en cours</span></li>
+                        <li class="cmd-divider"></li>
+                        <li><span class="cmd-trigger">"efface tout"</span> <span class="cmd-desc">Nettoie tous les widgets et notes</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="footer-info">
+                    <span class="footer-title">Vocalis AI</span>
+                    <span class="footer-version">v1.0.0</span>
+                </div>
+                <div class="footer-copyright">
+                    <i class="fa-regular fa-copyright"></i> 2026 Tous droits réservés.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Top Navigation / Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="btn-menu" id="btnOpenSidebar" aria-label="Ouvrir le menu">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                    </button>
+                    <h1>Vocalis <span class="gradient-text">AI</span></h1>
+                </div>
+                <div class="header-right">
+                    <div class="connection-indicator" id="connectionIndicator">
+                        <span class="dot pulse-dot"></span>
+                        <span class="status-text" id="statusLabel">Mode Démo local</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Grid Content Layout -->
+            <div class="workspace-grid">
+                
+                <!-- Left/Center Column: Voice Orb & Conversation Display -->
+                <div class="assistant-pane">
+                    
+                    <!-- Glow & Visualiser Area -->
+                    <div class="orb-container">
+                        <div class="glow-bg" id="glowBg"></div>
+                        <canvas id="orbCanvas" width="400" height="400"></canvas>
+                        
+                        <!-- Pulse Button Over the Orb -->
+                        <button class="btn-orb-trigger" id="btnOrbTrigger" aria-label="Activer la reconnaissance vocale">
+                            <i class="fa-solid fa-microphone" id="triggerIcon"></i>
+                        </button>
+                        
+                        <!-- Shazam Trigger Button -->
+                        <button class="btn-shazam-trigger" id="btnShazamTrigger" title="Identifier la musique (Shazam)" aria-label="Identifier la musique avec Shazam">
+                            <i class="fa-solid fa-music"></i>
+                        </button>
+                    </div>
+
+                    <!-- Status Display -->
+                    <div class="assistant-status" aria-live="polite" role="status">
+                        <p class="status-main" id="assistantStatusText">Cliquez sur le micro ou l'orbe pour commencer à parler</p>
+                        <p class="status-sub" id="assistantSubStatusText">Prêt à vous aider pour tout faire et tout savoir</p>
+                    </div>
+
+                    <!-- Transcript cards (Speech-to-Text) -->
+                    <div class="speech-cards-container">
+                        <div class="speech-card user-card hidden" id="userSpeechCard">
+                            <div class="card-header">
+                                <span class="speaker"><i class="fa-solid fa-circle-user"></i> Vous</span>
+                                <span class="time" id="userCardTime">12:00</span>
+                            </div>
+                            <p class="card-content" id="userSpeechText" aria-live="polite">...</p>
+                        </div>
+
+                        <div class="speech-card ai-card hidden" id="aiResponseCard">
+                            <div class="card-header">
+                                <span class="speaker"><i class="fa-solid fa-wand-magic-sparkles"></i> Vocalis AI</span>
+                                <span class="actions">
+                                    <button class="card-action-btn" id="btnMuteResponse" title="Muet/Parler" aria-label="Désactiver ou activer la synthèse vocale">
+                                        <i class="fa-solid fa-volume-high" id="muteIcon"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <p class="card-content" id="aiResponseText" aria-live="polite">...</p>
+                            <div class="card-loading hidden" id="aiLoadingIndicator">
+                                <span class="loading-dot"></span>
+                                <span class="loading-dot"></span>
+                                <span class="loading-dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Dynamic Widgets Panel (Flex Grid) -->
+                <div class="widgets-pane">
+                    <div class="widgets-header">
+                        <h2><i class="fa-solid fa-cubes"></i> Panneau d'actions <span class="widget-count-badge" id="widgetCountBadge">0</span></h2>
+                        <button class="btn-clear-widgets" id="btnClearWidgets" title="Effacer tous les widgets">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="widgets-container" id="widgetsContainer">
+                        <!-- Default empty state -->
+                        <div class="empty-widgets" id="emptyWidgetsState">
+                            <div class="empty-icon animate-bounce">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <h3>Aucune action active</h3>
+                            <p>Demandez à l'assistant par la voix ou utilisez les actions rapides ci-dessous :</p>
+                            
+                            <!-- Quick Actions Row -->
+                            <div class="quick-actions-grid">
+                                <button class="btn-quick-action" onclick="createNoteWidget('Acheter des fruits 🍎')">
+                                    <i class="fa-solid fa-note-sticky text-purple"></i>
+                                    <span>Note rapide</span>
+                                </button>
+                                <button class="btn-quick-action" onclick="createTimerWidget(30, 'Minuteur 30s ⏱️')">
+                                    <i class="fa-solid fa-stopwatch text-cyan"></i>
+                                    <span>Minuteur 30s</span>
+                                </button>
+                                <button class="btn-quick-action" onclick="createWeatherWidget('Paris')">
+                                    <i class="fa-solid fa-cloud-sun text-yellow"></i>
+                                    <span>Météo Paris</span>
+                                </button>
+                                <button class="btn-quick-action" onclick="window.dispatchEvent(new CustomEvent('vocalis-shazam-trigger'))">
+                                    <i class="fa-solid fa-music text-blue"></i>
+                                    <span>Lancer Shazam</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Suggestion Footer -->
+            <footer class="app-footer">
+                <div class="suggestions-container">
+                    <span class="suggestion-tag"><i class="fa-solid fa-lightbulb"></i> Essayez :</span>
+                    <div class="suggestions-scroller">
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Commence une session d\'étude')">"Commence une session d'étude"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Allume la lampe de bureau')">"Allume la lampe de bureau"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Règle le chauffage sur 21 degrés')">"Chauffage à 21°C"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Prépare un café')">"Prépare un café"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Active le mode concentration')">"Mode concentration"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Note : Réviser l\'examen d\'algorithmique')">"Note rapide"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Météo à Madagascar')">"Météo à Madagascar"</button>
+                        <button class="btn-suggest" onclick="setInputAndTrigger('Calcule 45 divisé par 9')">"Calcule 45/9"</button>
+                    </div>
+                </div>
+                <div class="footer-copyright-main">
+                    <span><i class="fa-regular fa-copyright"></i> 2026 Ricardo Ratovoarisoa. Tous droits réservés.</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Background Sound for Timers/Alerts -->
+    <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
+
+    <!-- Scripts -->
+    <script src="orb.js"></script>
+    <script src="fileExplorer.js"></script>
+    <script src="commands.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

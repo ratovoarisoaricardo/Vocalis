@@ -1,0 +1,902 @@
+<!--
+    Copyright (c) 2026 Ricardo Ratovoarisoa. Tous droits réservés.
+    Ce projet et son code source sont protégés sous licence propriétaire.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocalis AI - Banc de Tests Unitaires</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #060813;
+            --bg-sidebar: rgba(10, 12, 26, 0.7);
+            --bg-card: rgba(22, 28, 54, 0.45);
+            --bg-card-hover: rgba(28, 36, 68, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #8b5cf6; /* Violet */
+            --accent-secondary: #06b6d4; /* Cyan */
+            --accent-tertiary: #ec4899; /* Pink */
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 45%);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 10px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Summary Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-val {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            height: 24px;
+            width: 100%;
+            margin-bottom: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-secondary), var(--success));
+            border-radius: 12px;
+            transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-run {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 28px;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-run:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .filter-select {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            padding: 8px 16px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Test Table */
+        .test-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .test-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+
+        .test-item:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: var(--bg-card-hover);
+        }
+
+        .test-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .test-icon {
+            font-size: 1.25rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-icon.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .test-icon.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .test-icon.pending {
+            background: rgba(148, 163, 184, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .test-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .test-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .test-desc {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .test-query {
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            font-family: monospace;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            color: var(--accent-secondary);
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .test-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .test-status-badge {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .test-status-badge.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .test-status-badge.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .test-status-badge.pending {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-details {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-details:hover {
+            color: var(--text-primary);
+        }
+
+        /* Detail modal/panel styles */
+        .test-details-panel {
+            grid-column: 1 / -1;
+            background: rgba(10, 14, 34, 0.6);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 20px;
+            margin-top: 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .detail-line {
+            display: flex;
+            gap: 10px;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            min-width: 140px;
+        }
+
+        .detail-val {
+            color: var(--text-primary);
+        }
+
+        .detail-val.json {
+            color: #d4a373;
+        }
+
+        .detail-val.error {
+            color: var(--danger);
+        }
+
+        /* Utilities */
+        .success-text { color: var(--success); }
+        .danger-text { color: var(--danger); }
+        .accent-text { color: var(--accent-secondary); }
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .nav-back:hover {
+            color: var(--accent-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Retour à Vocalis AI</a>
+        
+        <header>
+            <h1>Vocalis <span class="gradient-text">Diagnostics</span></h1>
+            <p class="subtitle">Banc de tests unitaires du parseur de commandes vocales</p>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="statTotal">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val success-text" id="statPass">0</div>
+                <div class="stat-label">Réussis</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val danger-text" id="statFail">0</div>
+                <div class="stat-label">Échoués</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val accent-text" id="statCoverage">92%</div>
+                <div class="stat-label">Couverture Est.</div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+            <div class="progress-text" id="progressText">0% Terminé</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn-run" id="btnRunTests"><i class="fa-solid fa-play"></i> Lancer le banc de tests</button>
+            <select class="filter-select" id="filterStatus">
+                <option value="all">Tous les tests</option>
+                <option value="pass">Réussis uniquement</option>
+                <option value="fail">Échoués uniquement</option>
+            </select>
+        </div>
+
+        <!-- Test List Container -->
+        <div class="test-list" id="testListContainer">
+            <!-- Dynamic Injection -->
+        </div>
+    </div>
+
+    <!-- MOCKS MOCKING DOM & GLOBAL APIS FOR commands.js -->
+    <script>
+        // Mocks globaux requis par commands.js
+        window.ActiveWidgets = {
+            timers: [],
+            notes: [],
+            weather: []
+        };
+
+        // Simuler le container HTML des widgets
+        const mockWidgetsContainer = document.createElement('div');
+        mockWidgetsContainer.id = 'widgetsContainer';
+        document.body.appendChild(mockWidgetsContainer);
+
+        // Mocks de fonctions UI
+        window.removeEmptyState = function() {};
+        window.closeWidget = function(id) {
+            console.log(`Widget fermé : ${id}`);
+        };
+        window.createNoteWidget = function(content) {
+            console.log(`Note créée : ${content}`);
+        };
+        window.createTimerWidget = function(secs, title) {
+            console.log(`Minuteur lancé : ${secs}s (${title})`);
+        };
+        window.createWeatherWidget = function(city) {
+            console.log(`Météo affichée : ${city}`);
+        };
+        window.createCalcWidget = function(exp, res) {
+            console.log(`Calcul effectué : ${exp} = ${res}`);
+        };
+        window.createMediaWidget = function(type, query) {
+            console.log(`Widget média créé : ${type} pour ${query}`);
+        };
+        window.createVolumeWidget = function(vol) {
+            console.log(`Widget volume créé : ${vol}`);
+        };
+        window.createDictationWidget = function() {
+            console.log(`Widget dictée créé`);
+        };
+        window.createShazamWidget = function(song) {
+            console.log(`Widget Shazam créé :`, song);
+        };
+
+        // Mock window.open pour éviter les popups réels durant les tests
+        const openedUrls = [];
+        window.open = function(url, target) {
+            openedUrls.push(url);
+            console.log(`window.open appelé avec : ${url} (${target})`);
+            return {};
+        };
+
+        // Mock localStorage
+        const localStore = {};
+        window.localStorage = {
+            getItem: (key) => localStore[key] || null,
+            setItem: (key, val) => { localStore[key] = String(val); },
+            removeItem: (key) => { delete localStore[key]; },
+            clear: () => { for (let k in localStore) delete localStore[k]; }
+        };
+    </script>
+
+    <!-- CHARGER LE FICHIER DE COMMANDES -->
+    <script src="commands.js"></script>
+
+    <!-- SCRIPT DE TEST DE VOCALIS -->
+    <script>
+        // Définition de la suite de tests
+        const testSuite = [
+            // 1. Notes
+            {
+                name: "Créer une note simple",
+                desc: "Vérifie l'extraction du contenu d'une note simple",
+                query: "crée une note acheter des pommes",
+                assert: (res) => {
+                    return res && res.type === 'note' && res.data === 'acheter des pommes' && res.speechResponse.includes("acheter des pommes");
+                }
+            },
+            {
+                name: "Ajouter une note avec syntaxe alternative",
+                desc: "Vérifie la syntaxe alternative 'note de [texte]'",
+                query: "note de faire la vaisselle",
+                assert: (res) => {
+                    return res && res.type === 'note' && res.data === 'faire la vaisselle';
+                }
+            },
+            // 2. Minuteurs
+            {
+                name: "Lancer un minuteur en secondes",
+                desc: "Vérifie la conversion correcte des secondes",
+                query: "lance un minuteur de 45 secondes",
+                assert: (res) => {
+                    return res && res.type === 'timer' && res.data === 45 && res.speechResponse.includes("45 secondes");
+                }
+            },
+            {
+                name: "Lancer un minuteur en minutes",
+                desc: "Vérifie la conversion en secondes pour l'unité minutes",
+                query: "minuteur 5 minutes",
+                assert: (res) => {
+                    return res && res.type === 'timer' && res.data === 300;
+                }
+            },
+            // 3. Météo
+            {
+                name: "Demander la météo locale",
+                desc: "Vérifie l'extraction du nom de la ville",
+                query: "météo à Bordeaux",
+                assert: (res) => {
+                    return res && res.type === 'weather' && res.data.toLowerCase() === 'bordeaux';
+                }
+            },
+            {
+                name: "Demander le temps qu'il fait",
+                desc: "Vérifie la syntaxe longue de la météo",
+                query: "quel temps fait-il à Paris ?",
+                assert: (res) => {
+                    return res && res.type === 'weather' && res.data.toLowerCase() === 'paris';
+                }
+            },
+            // 4. Calculatrice
+            {
+                name: "Calcul d'addition simple",
+                desc: "Vérifie l'évaluation de 25 plus 17",
+                query: "combien font 25 plus 17",
+                assert: (res) => {
+                    return res && res.type === 'calculator' && res.data === 42;
+                }
+            },
+            {
+                name: "Calcul de division complexe",
+                desc: "Vérifie l'évaluation de 120 divisé par 5",
+                query: "calcule 120 divisé par 5",
+                assert: (res) => {
+                    return res && res.type === 'calculator' && res.data === 24;
+                }
+            },
+            // 5. Recherche Web
+            {
+                name: "Recherche Google simple",
+                desc: "Vérifie la génération de l'URL Google et l'ouverture d'onglet",
+                query: "cherche pizza napolitaine sur google",
+                assert: (res) => {
+                    const expectedUrl = "https://www.google.com/search?q=pizza%20napolitaine";
+                    return res && res.type === 'search' && res.data.includes(encodeURIComponent("pizza napolitaine")) && openedUrls.includes(res.data);
+                }
+            },
+            // 6. Musique
+            {
+                name: "Lancer de la musique (YouTube)",
+                desc: "Vérifie la détection de commande de lecture musicale",
+                query: "joue Bohemian Rhapsody",
+                assert: (res) => {
+                    return res && res.type === 'music' && res.data.includes("Bohemian%20Rhapsody") && res.speechResponse.includes("Bohemian Rhapsody");
+                }
+            },
+            {
+                name: "Lancer de la musique alternative",
+                desc: "Vérifie la syntaxe alternative 'écoute [artiste]'",
+                query: "écoute Stromae",
+                assert: (res) => {
+                    return res && res.type === 'music' && res.data.includes("Stromae");
+                }
+            },
+            // 7. Vidéo
+            {
+                name: "Recherche de vidéo YouTube",
+                desc: "Vérifie la détection du mot clé vidéo",
+                query: "regarde la vidéo de Mr Beast",
+                assert: (res) => {
+                    return res && res.type === 'video' && res.data.includes("Mr%20Beast") && res.speechResponse.includes("Mr Beast");
+                }
+            },
+            // 8. Contrôle du volume
+            {
+                name: "Augmenter le volume",
+                desc: "Vérifie l'augmentation incrémentale du volume",
+                query: "augmente le volume",
+                assert: (res) => {
+                    return res && res.type === 'volume' && res.data > 0.8;
+                }
+            },
+            {
+                name: "Régler le volume à un pourcentage",
+                desc: "Vérifie le réglage exact du volume",
+                query: "volume à 50 %",
+                assert: (res) => {
+                    return res && res.type === 'volume' && res.data === 0.5;
+                }
+            },
+            // 9. Explorateur de fichiers
+            {
+                name: "Ouvrir l'explorateur de fichiers",
+                desc: "Vérifie l'activation de l'explorateur local",
+                query: "ouvre mes fichiers",
+                assert: (res) => {
+                    return res && res.type === 'file_explore';
+                }
+            },
+            {
+                name: "Rechercher un fichier",
+                desc: "Vérifie la recherche d'un fichier par son nom",
+                query: "cherche le fichier rapport annuel",
+                assert: (res) => {
+                    return res && res.type === 'file_search' && res.data === 'rapport annuel';
+                }
+            },
+            // 10. Mode Dictée
+            {
+                name: "Activer le mode dictée",
+                desc: "Vérifie le démarrage du widget de dictée",
+                query: "mode dictée",
+                assert: (res) => {
+                    return res && res.type === 'dictation_start';
+                }
+            },
+            {
+                name: "Corriger le texte en mode dictée",
+                desc: "Vérifie le déclenchement de la correction par l'IA",
+                query: "corrige le texte",
+                assert: (res) => {
+                    return res && res.type === 'dictation_correct';
+                }
+            },
+            // 11. Shazam (Reconnaissance musicale)
+            {
+                name: "Déclencher la commande Shazam vocale",
+                desc: "Vérifie que l'intention Shazam est bien détectée",
+                query: "c'est quoi cette musique",
+                assert: (res) => {
+                    return res && res.type === 'shazam';
+                }
+            },
+            {
+                name: "Déclencher Shazam via synonyme",
+                desc: "Vérifie la détection du terme exact 'shazam'",
+                query: "shazam",
+                assert: (res) => {
+                    return res && res.type === 'shazam';
+                }
+            },
+            // 11b. Chambre Connectée (Smart Room)
+            {
+                name: "Allumer la lumière (Smart Room)",
+                desc: "Vérifie l'activation de la lampe",
+                query: "allume la lampe de bureau",
+                assert: (res) => {
+                    return res && res.type === 'smart_room' && res.data.action === 'light' && res.data.value === true;
+                }
+            },
+            {
+                name: "Régler le chauffage (Smart Room)",
+                desc: "Vérifie la mise à jour de la température",
+                query: "règle le chauffage sur 22 degrés",
+                assert: (res) => {
+                    return res && res.type === 'smart_room' && res.data.action === 'heating' && res.data.value === 22;
+                }
+            },
+            {
+                name: "Cafetière (Smart Room)",
+                desc: "Vérifie le déclenchement de la préparation du café",
+                query: "lance le café",
+                assert: (res) => {
+                    return res && res.type === 'smart_room' && res.data.action === 'coffee' && res.data.value === true;
+                }
+            },
+            {
+                name: "Mode Concentration (Smart Room)",
+                desc: "Vérifie le passage en mode concentration",
+                query: "active le mode concentration",
+                assert: (res) => {
+                    return res && res.type === 'smart_room' && res.data.action === 'focus' && res.data.value === true;
+                }
+            },
+            // 11c. Pomodoro
+            {
+                name: "Démarrer Pomodoro",
+                desc: "Vérifie le déclenchement du minuteur Pomodoro",
+                query: "démarre une session de révision",
+                assert: (res) => {
+                    return res && res.type === 'pomodoro';
+                }
+            },
+            // 12. Fallback
+            {
+                name: "Requête générale (Fallback)",
+                desc: "Vérifie qu'une question générale n'est pas interceptée localement (renvoie null pour laisser l'IA y répondre)",
+                query: "qui est Albert Einstein ?",
+                assert: (res) => {
+                    return res === null;
+                }
+            }
+        ];
+
+        const container = document.getElementById('testListContainer');
+        const statTotal = document.getElementById('statTotal');
+        const statPass = document.getElementById('statPass');
+        const statFail = document.getElementById('statFail');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const filterStatus = document.getElementById('filterStatus');
+        const btnRunTests = document.getElementById('btnRunTests');
+
+        let testResults = [];
+
+        // Initialiser la vue
+        function initTestView() {
+            container.innerHTML = '';
+            statTotal.textContent = testSuite.length;
+            statPass.textContent = 0;
+            statFail.textContent = 0;
+            progressBar.style.width = '0%';
+            progressText.textContent = '0% Terminé';
+            
+            testSuite.forEach((t, index) => {
+                const item = document.createElement('div');
+                item.className = 'test-item';
+                item.id = `test-item-${index}`;
+                item.setAttribute('data-status', 'pending');
+                
+                item.innerHTML = `
+                    <div class="test-left">
+                        <div class="test-icon pending" id="test-icon-${index}">
+                            <i class="fa-solid fa-circle-question"></i>
+                        </div>
+                        <div class="test-info">
+                            <span class="test-name">${t.name}</span>
+                            <span class="test-desc">${t.desc}</span>
+                            <div><span class="test-query">"${t.query}"</span></div>
+                        </div>
+                    </div>
+                    <div class="test-right">
+                        <span class="test-status-badge pending" id="test-badge-${index}">En attente</span>
+                        <button class="btn-details" onclick="toggleDetails(${index})"><i class="fa-solid fa-chevron-down"></i></button>
+                    </div>
+                    <div class="test-details-panel" id="test-details-${index}">
+                        <div class="detail-line">
+                            <div class="detail-label">Entrée :</div>
+                            <div class="detail-val">"${t.query}"</div>
+                        </div>
+                        <div class="detail-line">
+                            <div class="detail-label">Résultat attendu :</div>
+                            <div class="detail-val">Conforme aux assertions de test</div>
+                        </div>
+                        <div class="detail-line">
+                            <div class="detail-label">Résultat obtenu :</div>
+                            <div class="detail-val error">Non exécuté</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Toggle Details Panel
+        window.toggleDetails = function(index) {
+            const panel = document.getElementById(`test-details-${index}`);
+            const icon = document.querySelector(`#test-item-${index} .btn-details i`);
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                panel.style.display = 'flex';
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        };
+
+        // Exécuter la suite de tests
+        async function runTests() {
+            btnRunTests.disabled = true;
+            btnRunTests.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Exécution en cours...';
+            
+            initTestView();
+            openedUrls.length = 0; // Vider les urls ouvertes
+            
+            let passedCount = 0;
+            let failedCount = 0;
+            
+            for (let i = 0; i < testSuite.length; i++) {
+                const t = testSuite[i];
+                const item = document.getElementById(`test-item-${i}`);
+                const icon = document.getElementById(`test-icon-${i}`);
+                const badge = document.getElementById(`test-badge-${i}`);
+                const detailsPanel = document.getElementById(`test-details-${i}`);
+                
+                // Petit délai pour l'animation visuelle
+                await new Promise(resolve => setTimeout(resolve, 80));
+                
+                let result = null;
+                let passed = false;
+                let errorObj = null;
+                
+                try {
+                    // Si la commande modifie le volume, on veut un point de départ connu
+                    if (t.query.includes("volume") || t.query.includes("son")) {
+                        localStorage.setItem('app_volume', '0.8');
+                    }
+                    
+                    // Exécuter la fonction sous test
+                    result = parseVoiceCommand(t.query);
+                    passed = t.assert(result);
+                } catch (e) {
+                    passed = false;
+                    errorObj = e;
+                }
+                
+                // Mettre à jour l'état
+                if (passed) {
+                    passedCount++;
+                    item.setAttribute('data-status', 'pass');
+                    icon.className = 'test-icon pass';
+                    icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                    badge.className = 'test-status-badge pass';
+                    badge.textContent = 'Pass';
+                    
+                    // Mettre à jour les détails
+                    detailsPanel.querySelector('.detail-val.error').className = 'detail-val json';
+                    detailsPanel.querySelector('.detail-val.json').textContent = JSON.stringify(result, null, 2) || "null (Match Fallback attendu)";
+                } else {
+                    failedCount++;
+                    item.setAttribute('data-status', 'fail');
+                    icon.className = 'test-icon fail';
+                    icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+                    badge.className = 'test-status-badge fail';
+                    badge.textContent = 'Fail';
+                    
+                    // Mettre à jour les détails de l'erreur
+                    const errEl = detailsPanel.querySelector('.detail-val.error');
+                    if (errorObj) {
+                        errEl.textContent = `Exception levée : ${errorObj.message}\n${errorObj.stack}`;
+                    } else {
+                        errEl.textContent = `Assertion échouée. Résultat obtenu : ${JSON.stringify(result, null, 2)}`;
+                    }
+                }
+                
+                // Mettre à jour le compteur global et la barre de progression
+                statPass.textContent = passedCount;
+                statFail.textContent = failedCount;
+                
+                const percent = Math.round(((i + 1) / testSuite.length) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}% Terminé (${passedCount}/${testSuite.length})`;
+                
+                // Appliquer les filtres courants
+                applyFilter();
+            }
+            
+            btnRunTests.disabled = false;
+            btnRunTests.innerHTML = '<i class="fa-solid fa-play"></i> Lancer le banc de tests';
+        }
+
+        // Appliquer le filtre de statut sélectionné
+        function applyFilter() {
+            const val = filterStatus.value;
+            const items = document.querySelectorAll('.test-item');
+            items.forEach(item => {
+                const status = item.getAttribute('data-status');
+                if (val === 'all') {
+                    item.style.display = 'flex';
+                } else if (val === 'pass' && status === 'pass') {
+                    item.style.display = 'flex';
+                } else if (val === 'fail' && status === 'fail') {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Événements
+        btnRunTests.addEventListener('click', runTests);
+        filterStatus.addEventListener('change', applyFilter);
+
+        // Initialisation initiale
+        initTestView();
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Vocalis AI - WhatsApp Translator",
+  "version": "1.0",
+  "description": "Translate WhatsApp messages instantly, powered by Vocalis AI.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://web.whatsapp.com/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
